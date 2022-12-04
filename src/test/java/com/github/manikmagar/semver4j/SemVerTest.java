@@ -15,6 +15,8 @@
  */
 package com.github.manikmagar.semver4j;
 
+import java.util.Arrays;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -108,4 +110,15 @@ class SemVerTest {
 				.withReleaseIdentifier("2")).as("Prerelease Version").asString().isEqualTo("1.2.3-alpha.1.2");
 	}
 
+	@Test
+	@DisplayName("Is initial development version")
+	void isInitialDevelopment() {
+		assertThat(Arrays.asList(new SemVer(), new SemVer(0, 2, 3))).as("Semver Zero Version")
+				.allSatisfy(semVer -> assertThat(semVer.isInitialDevelopment()).isTrue());
+	}
+	@Test
+	@DisplayName("Is not initial development version")
+	void isNotInitialDevelopment() {
+		assertThat(new SemVer(1, 2, 3).isInitialDevelopment()).as("Semver non-Zero Version").isFalse();
+	}
 }
