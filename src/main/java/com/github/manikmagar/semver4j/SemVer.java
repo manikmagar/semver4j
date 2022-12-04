@@ -118,6 +118,15 @@ public class SemVer {
 		return this;
 	}
 
+	/**
+	 * Major version zero is for initial development.
+	 * 
+	 * @return true if this is an initial development version.
+	 */
+	public boolean isInitialDevelopment() {
+		return getMajor() == 0;
+	}
+
 	@Override
 	public String toString() {
 		String version = String.format("%d.%d.%d", getMajor(), getMinor(), getPatch());
