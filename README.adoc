@@ -1,1 +1,49 @@
-SemVer4J
+= Semantic Version for Java
+
+Create, Parse, and Validate Semantic Version strings.
+
+== Usage
+
+Add following dependency to your project -
+
+.Maven Dependency
+[source, xml]
+----
+<dependency>
+  <groupId>com.github.manikmagar</groupId>
+  <artifactId>semver4j</artifactId>
+  <version>${semver4j.version}</version>
+</dependency>
+----
+
+.Gradle Dependency
+[source, groovy]
+----
+    implementation 'com.github.manikmagar:semver4j:${semver4j.version}'
+----
+
+== Build
+
+Run the following command to build this project:
+
+[source]
+----
+./mvnw clean verify
+----
+
+Pass the `-Dquick` option to skip all non-essential plug-ins and create the output artifact as quickly as possible:
+
+[source]
+----
+./mvnw clean verify -Dquick
+----
+
+Run the following command to format the source code and organize the imports as per the project's conventions:
+
+[source]
+----
+./mvnw process-sources
+----
+
+
+This code base is available under the Apache License, version 2.
