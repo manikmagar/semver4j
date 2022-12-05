@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 
 import com.github.manikmagar.semver4j.internal.Util;
 
+import static com.github.manikmagar.semver4j.internal.Util.isNotEmpty;
+
 /**
  * Create a valid Semantic Version. See
  * <a href="https://semver.org/">SemVer.org</a> for specification details.
@@ -36,6 +38,7 @@ public class SemVer {
 	private final AtomicInteger minor;
 	private final AtomicInteger patch;
 	private List<Prerelease> prereleases = Collections.synchronizedList(new ArrayList<>());
+	private List<BuildMetadata> buildMetadata = Collections.synchronizedList(new ArrayList<>());
 
 	public static final SemVer ZERO = new SemVer(0, 0, 0);
 
@@ -83,18 +86,77 @@ public class SemVer {
 		Util.mustBePositive(getPatch());
 	}
 
+	/**
+	 * Create SemVer representing the version with provided version component
+	 * numbers See <a href=
+	 * "https://semver.org/spec/v2.0.0.html#spec-item-2">v2.0.0.html#spec-item-2</a>
+	 * 
+	 * @param major
+	 *            version of the SemVer
+	 * @param minor
+	 *            version of the SemVer
+	 * @param patch
+	 *            version of the SemVer
+	 * @return SemVer with current version
+	 */
 	public static SemVer of(int major, int minor, int patch) {
 		return new SemVer(major, minor, patch);
 	}
+
+	/**
+	 * Add a prerelease identifier to the version. See <a href=
+	 * "https://semver.org/spec/v2.0.0.html#spec-item-9">v2.0.0.html#spec-item-9</a>
+	 * 
+	 * @param prerelease
+	 *            {@link Prerelease} Identifier
+	 * @return SemVer with current version
+	 */
 	public SemVer of(Prerelease prerelease) {
 		this.prereleases.add(prerelease);
 		return this;
 	}
 
+	/**
+	 * Create {@link Prerelease} for given identifier
+	 * 
+	 * @param identifier
+	 *            {@link String}
+	 * @return Prerelease
+	 */
 	public static Prerelease prerelease(String identifier) {
 		return Prerelease.of(identifier);
 	}
 
+	/**
+	 * Create {@link BuildMetadata} for given identifier
+	 * 
+	 * @param identifier
+	 *            {@link String}
+	 * @return BuildMetadata
+	 */
+	public static BuildMetadata build(String identifier) {
+		return BuildMetadata.of(identifier);
+	}
+
+	/**
+	 * Add a Build metadata identifier to the version. See <a href=
+	 * "https://semver.org/spec/v2.0.0.html#spec-item-9">v2.0.0.html#spec-item-9</a>
+	 * 
+	 * @param buildMetadata
+	 *            {@link BuildMetadata} Identifier
+	 * @return SemVer with current version
+	 */
+	public SemVer of(BuildMetadata buildMetadata) {
+		this.buildMetadata.add(buildMetadata);
+		return this;
+	}
+
+	/**
+	 * Increment major number of this version. See <a href=
+	 * "https://semver.org/spec/v2.0.0.html#spec-item-8">v2.0.0.html#spec-item-8</a>.
+	 * 
+	 * @return SemVer with new version
+	 */
 	public SemVer incrementMajor() {
 		major.incrementAndGet();
 		minor.set(0);
@@ -103,6 +165,12 @@ public class SemVer {
 		return this;
 	}
 
+	/**
+	 * Increment minor number of this version. See <a href=
+	 * "https://semver.org/spec/v2.0.0.html#spec-item-7">v2.0.0.html#spec-item-7</a>.
+	 * 
+	 * @return SemVer with new version
+	 */
 	public SemVer incrementMinor() {
 		minor.incrementAndGet();
 		patch.set(0);
@@ -110,6 +178,12 @@ public class SemVer {
 		return this;
 	}
 
+	/**
+	 * Increment patch number of this version. See <a href=
+	 * "https://semver.org/spec/v2.0.0.html#spec-item-6">v2.0.0.html#spec-item-6</a>.
+	 * 
+	 * @return SemVer with new version
+	 */
 	public SemVer incrementPatch() {
 		patch.incrementAndGet();
 		resetMetadata();
@@ -124,8 +198,9 @@ public class SemVer {
 			this.prereleases = Collections.synchronizedList(new ArrayList<>());
 	}
 	/**
-	 * Major version zero is for initial development.
-	 * 
+	 * Major version zero is for initial development. See <a href=
+	 * "https://semver.org/spec/v2.0.0.html#spec-item-4">v2.0.0.html#spec-item-4</a>.
+	 *
 	 * @return true if this is an initial development version.
 	 */
 	public boolean isInitialDevelopment() {
@@ -140,8 +215,12 @@ public class SemVer {
 	public String toString() {
 		String version = String.format("%d.%d.%d", getMajor(), getMinor(), getPatch());
 		String releaseIdentifier = prereleases.stream().map(Prerelease::getLabel).collect(Collectors.joining("."));
-		if (!releaseIdentifier.isEmpty())
+		if (isNotEmpty(releaseIdentifier))
 			version = version + "-" + releaseIdentifier;
+		String buildIdentifier = buildMetadata.stream().map(BuildMetadata::getLabel).collect(Collectors.joining("."));
+		if (isNotEmpty(buildIdentifier)) {
+			version = version + "+" + buildIdentifier;
+		}
 		return version;
 	}
 
@@ -171,7 +250,8 @@ public class SemVer {
 	}
 
 	/**
-	 * SemVer Prerelease Identifier.
+	 * SemVer Prerelease Identifier. See <a href=
+	 * "https://semver.org/spec/v2.0.0.html#spec-item-9">v2.0.0.html#spec-item-9</a>
 	 */
 	public static class Prerelease extends Identifier {
 		private Prerelease(String label) {
@@ -205,6 +285,21 @@ public class SemVer {
 						String.format("Leading zeros are not allowed for numerical identifier '%s'", label));
 			}
 			return label;
+		}
+	}
+
+	/**
+	 * SemVer Build Metadata. See <a href=
+	 * "https://semver.org/spec/v2.0.0.html#spec-item-10">v2.0.0.html#spec-item-10</a>
+	 */
+	public static class BuildMetadata extends Identifier {
+
+		private BuildMetadata(String label) {
+			super(label);
+		}
+
+		public static BuildMetadata of(String label) {
+			return new BuildMetadata(validated(label));
 		}
 
 	}
