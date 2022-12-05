@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import static com.github.manikmagar.semver4j.SemVer.prerelease;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
@@ -63,7 +64,7 @@ class SemVerTest {
 
 	@Test
 	void withVersions() {
-		assertThat(SemVer.with(1, 2, 3)).as("Semver 1.2.3").asString().isEqualTo("1.2.3");
+		assertThat(SemVer.of(1, 2, 3)).as("Semver 1.2.3").asString().isEqualTo("1.2.3");
 	}
 
 	@Test
@@ -74,10 +75,23 @@ class SemVerTest {
 	}
 
 	@Test
+	@DisplayName("Increment Major version with Prerelease")
+	void incrementMajorWithPrerelease() {
+		assertThat(new SemVer(1, 2, 3).of(prerelease("alpha")).incrementMajor())
+				.as("Semver 1.2.3-aplha incremented major").asString().isEqualTo("2.0.0");
+	}
+
+	@Test
 	@DisplayName("Increment Minor version")
 	void incrementMinor() {
 		assertThat(new SemVer(1, 2, 3).incrementMinor()).as("Semver 1.2.3 incremented minor").asString()
 				.isEqualTo("1.3.0");
+	}
+	@Test
+	@DisplayName("Increment Minor version with Prerelease")
+	void incrementMinorWithPrerelease() {
+		assertThat(new SemVer(1, 2, 3).of(prerelease("alpha")).incrementMinor())
+				.as("Semver 1.2.3-alpha incremented minor").asString().isEqualTo("1.3.0");
 	}
 
 	@Test
@@ -88,9 +102,16 @@ class SemVerTest {
 	}
 
 	@Test
+	@DisplayName("Increment Patch version with Prerelease")
+	void incrementPatchWithPrerelease() {
+		assertThat(new SemVer(1, 2, 3).of(prerelease("alpha")).incrementPatch())
+				.as("Semver 1.2.3-alphas incremented patch").asString().isEqualTo("1.2.4");
+	}
+
+	@Test
 	@DisplayName("Null prerelease indicator")
 	void withNullPrereleaseIndicator() {
-		NullPointerException npe = catchThrowableOfType(() -> new SemVer(1, 2, 3).withReleaseIdentifier(null),
+		NullPointerException npe = catchThrowableOfType(() -> new SemVer(1, 2, 3).of(prerelease(null)),
 				NullPointerException.class);
 		assertThat(npe).isNotNull().hasMessage("Identifier must not be null");
 	}
@@ -98,15 +119,30 @@ class SemVerTest {
 	@Test
 	@DisplayName("Single prerelease identifier with allowed characters")
 	void withSinglePrereleaseIdentifier() {
-		assertThat(new SemVer(1, 2, 3).withReleaseIdentifier("Al-pha01"))
-				.as("Prerelease Version with all allowed characters").asString().isEqualTo("1.2.3-Al-pha01");
+		assertThat(new SemVer(1, 2, 3).of(prerelease("Al-pha01"))).as("Prerelease Version with all allowed characters")
+				.asString().isEqualTo("1.2.3-Al-pha01");
+	}
+
+	@Test
+	@DisplayName("Numeric prerelease identifier without leading zeros")
+	void withNumericWithoutLeadingZerosPrereleaseIdentifier() {
+		assertThat(new SemVer(1, 2, 3).of(prerelease("1000234"))).as("Prerelease Version with all allowed characters")
+				.asString().isEqualTo("1.2.3-1000234");
+	}
+
+	@Test
+	@DisplayName("Numeric prerelease identifier with leading zeros")
+	void withNumericWithLeadingZerosPrereleaseIdentifier() {
+		IllegalArgumentException ex = catchThrowableOfType(() -> new SemVer(1, 2, 3).of(prerelease("0001234")),
+				IllegalArgumentException.class);
+		assertThat(ex).isNotNull().hasMessage("Leading zeros are not allowed for numerical identifier '0001234'");
 	}
 
 	@Test
 	@DisplayName("Prerelease indicator")
 	void isPrerelease() {
-		assertThat(new SemVer(1, 2, 3).withReleaseIdentifier("Al-pha01"))
-				.as("Prerelease Version with all allowed characters").extracting(SemVer::isPrerelease).isEqualTo(true);
+		assertThat(new SemVer(1, 2, 3).of(prerelease("Al-pha01"))).as("Prerelease Version with all allowed characters")
+				.extracting(SemVer::isPrerelease).isEqualTo(true);
 	}
 
 	@Test
@@ -118,17 +154,17 @@ class SemVerTest {
 	@Test
 	@DisplayName("Single prerelease identifier with disallowed characters")
 	void withPrereleaseInvalidIdentifier() {
-		IllegalArgumentException exception = catchThrowableOfType(
-				() -> new SemVer(1, 2, 3).withReleaseIdentifier("Al-pha01#"), IllegalArgumentException.class);
+		IllegalArgumentException exception = catchThrowableOfType(() -> new SemVer(1, 2, 3).of(prerelease("Al-pha01#")),
+				IllegalArgumentException.class);
 		assertThat(exception).isNotNull()
-				.hasMessage("Release identifier 'Al-pha01#' does not match with pattern '^[0-9A-Za-z-.]*$'");
+				.hasMessage("Identifier 'Al-pha01#' does not match with pattern '^[0-9A-Za-z-]*$'");
 	}
 
 	@Test
 	@DisplayName("Multiple prerelease identifiers")
 	void withMultiplePrereleaseIdentifier() {
-		assertThat(new SemVer(1, 2, 3).withReleaseIdentifier("alpha").withReleaseIdentifier("1")
-				.withReleaseIdentifier("2")).as("Prerelease Version").asString().isEqualTo("1.2.3-alpha.1.2");
+		assertThat(new SemVer(1, 2, 3).of(prerelease("alpha")).of(prerelease("1")).of(prerelease("2")))
+				.as("Prerelease Version").asString().isEqualTo("1.2.3-alpha.1.2");
 	}
 
 	@Test

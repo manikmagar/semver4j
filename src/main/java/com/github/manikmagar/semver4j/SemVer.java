@@ -25,20 +25,17 @@ import java.util.stream.Collectors;
 
 import com.github.manikmagar.semver4j.internal.Util;
 
-import static com.github.manikmagar.semver4j.SemVer.Patterns.PRE_RELEASE;
-
 /**
- * Create a valid Semantic Version.
- *
- * See <a href="https://semver.org/">SemVer.org</a> for specification details.
+ * Create a valid Semantic Version. See
+ * <a href="https://semver.org/">SemVer.org</a> for specification details.
  *
  * @author manikmagar
  */
 public class SemVer {
-	private AtomicInteger major = new AtomicInteger(0);
-	private AtomicInteger minor = new AtomicInteger(0);
-	private AtomicInteger patch = new AtomicInteger(0);
-	private List<String> releaseIdentifiers = Collections.synchronizedList(new ArrayList<>());
+	private final AtomicInteger major;
+	private final AtomicInteger minor;
+	private final AtomicInteger patch;
+	private List<Prerelease> prereleases = Collections.synchronizedList(new ArrayList<>());
 
 	public static final SemVer ZERO = new SemVer(0, 0, 0);
 
@@ -86,35 +83,36 @@ public class SemVer {
 		Util.mustBePositive(getPatch());
 	}
 
-	public static SemVer with(int major, int minor, int patch) {
+	public static SemVer of(int major, int minor, int patch) {
 		return new SemVer(major, minor, patch);
 	}
-
-	public SemVer withReleaseIdentifier(String identifier) {
-		Objects.requireNonNull(identifier, "Identifier must not be null");
-		if (!PRE_RELEASE.matcher(identifier).matches()) {
-			throw new IllegalArgumentException(String.format("Release identifier '%s' does not match with pattern '%s'",
-					identifier, PRE_RELEASE.pattern()));
-		}
-		this.releaseIdentifiers.add(identifier);
+	public SemVer of(Prerelease prerelease) {
+		this.prereleases.add(prerelease);
 		return this;
+	}
+
+	public static Prerelease prerelease(String identifier) {
+		return Prerelease.of(identifier);
 	}
 
 	public SemVer incrementMajor() {
 		major.incrementAndGet();
 		minor.set(0);
 		patch.set(0);
+		resetMetadata();
 		return this;
 	}
 
 	public SemVer incrementMinor() {
 		minor.incrementAndGet();
 		patch.set(0);
+		resetMetadata();
 		return this;
 	}
 
 	public SemVer incrementPatch() {
 		patch.incrementAndGet();
+		resetMetadata();
 		return this;
 	}
 
@@ -122,8 +120,8 @@ public class SemVer {
 	 * Reset release identifiers and build metadata
 	 */
 	private void resetMetadata() {
-		if (!releaseIdentifiers.isEmpty())
-			this.releaseIdentifiers = Collections.synchronizedList(new ArrayList<>());
+		if (!prereleases.isEmpty())
+			this.prereleases = Collections.synchronizedList(new ArrayList<>());
 	}
 	/**
 	 * Major version zero is for initial development.
@@ -135,19 +133,79 @@ public class SemVer {
 	}
 
 	public boolean isPrerelease() {
-		return !this.releaseIdentifiers.isEmpty();
+		return !this.prereleases.isEmpty();
 	}
 
 	@Override
 	public String toString() {
 		String version = String.format("%d.%d.%d", getMajor(), getMinor(), getPatch());
-		String releaseIdentifier = releaseIdentifiers.stream().collect(Collectors.joining("."));
+		String releaseIdentifier = prereleases.stream().map(Prerelease::getLabel).collect(Collectors.joining("."));
 		if (!releaseIdentifier.isEmpty())
 			version = version + "-" + releaseIdentifier;
 		return version;
 	}
 
-	public interface Patterns {
-		Pattern PRE_RELEASE = Pattern.compile("^[0-9A-Za-z-.]*$");
+	public static class Identifier {
+		static Pattern PATTERN = Pattern.compile("^[0-9A-Za-z-]*$");
+		static Pattern NUMERIC_VALUE = Pattern.compile("^[0-9]*$");
+		private final String label;
+		private Identifier(String label) {
+			this.label = label;
+		}
+		public static Identifier of(String label) {
+			return new Identifier(validated(label));
+		}
+
+		public static String validated(String label) {
+			Objects.requireNonNull(label, "Identifier must not be null");
+			if (!PATTERN.matcher(label).matches()) {
+				throw new IllegalArgumentException(
+						String.format("Identifier '%s' does not match with pattern '%s'", label, PATTERN.pattern()));
+			}
+			return label;
+		}
+
+		public String getLabel() {
+			return label;
+		}
+	}
+
+	/**
+	 * SemVer Prerelease Identifier.
+	 */
+	public static class Prerelease extends Identifier {
+		private Prerelease(String label) {
+			super(label);
+		}
+
+		/**
+		 * Get {@link Prerelease} for given label
+		 * 
+		 * @param label
+		 * @return
+		 */
+		public static Prerelease of(String label) {
+			return new Prerelease(validated(label));
+		}
+
+		/**
+		 * Validates that label contains allowed characters only. When using numeric
+		 * identifier, leading zeros are not allowed.
+		 * 
+		 * @param label
+		 *            {@link String} of the identifier
+		 * @return String input label
+		 * @throws IllegalArgumentException
+		 *             if validation fails
+		 */
+		public static String validated(String label) {
+			Identifier.validated(label);
+			if (NUMERIC_VALUE.matcher(label).matches() && label.startsWith("0")) {
+				throw new IllegalArgumentException(
+						String.format("Leading zeros are not allowed for numerical identifier '%s'", label));
+			}
+			return label;
+		}
+
 	}
 }
