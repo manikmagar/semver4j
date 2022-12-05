@@ -38,7 +38,7 @@ public class SemVer {
 	private AtomicInteger major = new AtomicInteger(0);
 	private AtomicInteger minor = new AtomicInteger(0);
 	private AtomicInteger patch = new AtomicInteger(0);
-	private final List<String> releaseIdentifiers = Collections.synchronizedList(new ArrayList<>());
+	private List<String> releaseIdentifiers = Collections.synchronizedList(new ArrayList<>());
 
 	public static final SemVer ZERO = new SemVer(0, 0, 0);
 
@@ -119,12 +119,23 @@ public class SemVer {
 	}
 
 	/**
+	 * Reset release identifiers and build metadata
+	 */
+	private void resetMetadata() {
+		if (!releaseIdentifiers.isEmpty())
+			this.releaseIdentifiers = Collections.synchronizedList(new ArrayList<>());
+	}
+	/**
 	 * Major version zero is for initial development.
 	 * 
 	 * @return true if this is an initial development version.
 	 */
 	public boolean isInitialDevelopment() {
 		return getMajor() == 0;
+	}
+
+	public boolean isPrerelease() {
+		return !this.releaseIdentifiers.isEmpty();
 	}
 
 	@Override
