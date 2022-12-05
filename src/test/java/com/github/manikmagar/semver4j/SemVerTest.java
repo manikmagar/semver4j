@@ -88,10 +88,31 @@ class SemVerTest {
 	}
 
 	@Test
+	@DisplayName("Null prerelease indicator")
+	void withNullPrereleaseIndicator() {
+		NullPointerException npe = catchThrowableOfType(() -> new SemVer(1, 2, 3).withReleaseIdentifier(null),
+				NullPointerException.class);
+		assertThat(npe).isNotNull().hasMessage("Identifier must not be null");
+	}
+
+	@Test
 	@DisplayName("Single prerelease identifier with allowed characters")
 	void withSinglePrereleaseIdentifier() {
 		assertThat(new SemVer(1, 2, 3).withReleaseIdentifier("Al-pha01"))
 				.as("Prerelease Version with all allowed characters").asString().isEqualTo("1.2.3-Al-pha01");
+	}
+
+	@Test
+	@DisplayName("Prerelease indicator")
+	void isPrerelease() {
+		assertThat(new SemVer(1, 2, 3).withReleaseIdentifier("Al-pha01"))
+				.as("Prerelease Version with all allowed characters").extracting(SemVer::isPrerelease).isEqualTo(true);
+	}
+
+	@Test
+	@DisplayName("Not Prerelease indicator")
+	void isNotPrerelease() {
+		assertThat(new SemVer(1, 2, 3).isPrerelease()).as("Not a prerelease").isFalse();
 	}
 
 	@Test
@@ -121,4 +142,5 @@ class SemVerTest {
 	void isNotInitialDevelopment() {
 		assertThat(new SemVer(1, 2, 3).isInitialDevelopment()).as("Semver non-Zero Version").isFalse();
 	}
+
 }
