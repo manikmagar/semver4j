@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import static com.github.manikmagar.semver4j.SemVer.build;
 import static com.github.manikmagar.semver4j.SemVer.prerelease;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
@@ -179,4 +180,33 @@ class SemVerTest {
 		assertThat(new SemVer(1, 2, 3).isInitialDevelopment()).as("Semver non-Zero Version").isFalse();
 	}
 
+	@Test
+	@DisplayName("Single Build identifier with allowed characters")
+	void withSingleBuildIdentifier() {
+		assertThat(new SemVer(1, 2, 3).of(build("Some-01"))).as("Build Version with all allowed characters").asString()
+				.isEqualTo("1.2.3+Some-01");
+	}
+
+	@Test
+	@DisplayName("Build Identifier with prerelease identifier")
+	void buildWithPrereleaseIdentifier() {
+		assertThat(new SemVer(1, 2, 3).of(prerelease("Alpha-01")).of(build("Some-01")))
+				.as("Build Identifier with prerelease identifier").asString().isEqualTo("1.2.3-Alpha-01+Some-01");
+	}
+
+	@Test
+	@DisplayName("Multiple build and prerelease identifiers")
+	void multipleBuildWithPrereleaseIdentifier() {
+		assertThat(new SemVer(1, 2, 3).of(prerelease("Alpha")).of(prerelease("1")).of(build("Some")).of(build("001")))
+				.as("Multiple build and prerelease identifiers").asString().isEqualTo("1.2.3-Alpha.1+Some.001");
+	}
+
+	@Test
+	@DisplayName("Single Build identifier with disallowed characters")
+	void withBuildInvalidIdentifier() {
+		IllegalArgumentException exception = catchThrowableOfType(() -> new SemVer(1, 2, 3).of(build("Some-01#")),
+				IllegalArgumentException.class);
+		assertThat(exception).isNotNull()
+				.hasMessage("Identifier 'Some-01#' does not match with pattern '^[0-9A-Za-z-]*$'");
+	}
 }

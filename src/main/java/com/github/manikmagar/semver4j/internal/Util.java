@@ -29,4 +29,8 @@ public class Util {
 	public static void mustBePositive(Integer value) {
 		mustPass(value, v -> v >= 0, () -> String.format("Number %s must be positive", value));
 	}
+
+	public static boolean isNotEmpty(String value) {
+		return (value != null && !value.isEmpty() && !value.isBlank());
+	}
 }

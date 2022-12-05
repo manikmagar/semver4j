@@ -2,9 +2,9 @@
 
 Create, Parse, and Validate https://semver.org/spec/v2.0.0.html[Semantic Version 2.0.0] strings.
 
-== Usage
+== Dependency
 
-Add following dependency to your project -
+To use this library, add following dependency to your project -
 
 .Maven Dependency
 [source, xml]
@@ -19,7 +19,7 @@ Add following dependency to your project -
 .Gradle Dependency
 [source, groovy]
 ----
-    implementation 'com.github.manikmagar:semver4j:${semver4j.version}'
+implementation 'com.github.manikmagar:semver4j:${semver4j.version}'
 ----
 
 == Feature Implementation
@@ -33,10 +33,12 @@ Add following dependency to your project -
 - [x] Add valid Prerelease identifiers, examples:
 ** 1.2.3-alpha.1
 ** 1.2.3-alpha.release.1
-- [ ] Add build metadata
+- [x] Add build metadata
 - [ ] Compare Semantic versions based on specification precedence
 - [ ] Parse Semantic Version strings
 
+== Usage
+Check link:src/test/java/com/github/manikmagar/semver4j/SemVerTest.java[SemVerTest.java] for all usage examples.
 
 == Build
 

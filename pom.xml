@@ -333,6 +333,7 @@
     </activation>
     <properties>
       <skipTests>true</skipTests>
+      <quick>true</quick>
     </properties>
       <build>
         <plugins>
@@ -354,10 +355,18 @@
             <artifactId>license-maven-plugin</artifactId>
             <executions>
               <execution>
+                <id>format</id>
                 <goals>
                   <goal>format</goal>
                 </goals>
                 <phase>process-sources</phase>
+              </execution>
+              <execution>
+                <id>check</id>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+                <phase>none</phase>
               </execution>
             </executions>
           </plugin>
