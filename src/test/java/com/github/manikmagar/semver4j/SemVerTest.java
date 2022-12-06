@@ -211,4 +211,9 @@ class SemVerTest {
 				.hasMessage("Identifier 'Some-01#' does not match with pattern '^[0-9A-Za-z-]*$'");
 	}
 
+	@Test
+	@DisplayName("SemVer Zero")
+	void zero() {
+		assertThat(SemVer.zero()).asString().isEqualTo("0.0.0");
+	}
 }
