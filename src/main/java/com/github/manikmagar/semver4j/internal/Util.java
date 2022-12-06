@@ -31,6 +31,6 @@ public class Util {
 	}
 
 	public static boolean isNotEmpty(String value) {
-		return (value != null && !value.isEmpty() && !value.isBlank());
+		return (value != null && !value.trim().isEmpty());
 	}
 }
