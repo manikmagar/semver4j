@@ -104,6 +104,14 @@ public class SemVer {
 	}
 
 	/**
+	 * Returns {@link SemVer} for version 0.0.0
+	 *
+	 * @return SemVer
+	 */
+	public static SemVer zero() {
+		return new SemVer(0, 0, 0);
+	}
+	/**
 	 * Add a prerelease identifier to the version. See <a href=
 	 * "https://semver.org/spec/v2.0.0.html#spec-item-9">v2.0.0.html#spec-item-9</a>
 	 * 
@@ -111,7 +119,7 @@ public class SemVer {
 	 *            {@link Prerelease} Identifier
 	 * @return SemVer with current version
 	 */
-	public SemVer of(Prerelease prerelease) {
+	public SemVer with(Prerelease prerelease) {
 		this.prereleases.add(prerelease);
 		return this;
 	}
@@ -146,7 +154,7 @@ public class SemVer {
 	 *            {@link BuildMetadata} Identifier
 	 * @return SemVer with current version
 	 */
-	public SemVer of(BuildMetadata buildMetadata) {
+	public SemVer with(BuildMetadata buildMetadata) {
 		this.buildMetadata.add(buildMetadata);
 		return this;
 	}
