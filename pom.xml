@@ -100,7 +100,12 @@
       <version>3.23.1</version>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>com.github.bsideup.jabel</groupId>
+      <artifactId>jabel-javac-plugin</artifactId>
+      <version>1.0.0</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -184,6 +189,14 @@
           <version>3.8.1</version>
           <configuration>
             <parameters>true</parameters>
+            <!-- Make sure we're not using Java 9+ APIs -->
+            <release>8</release>
+            <source>11</source>
+            <target>11</target>
+            <!-- The following setting can be avoided on Java 14 and higher -->
+            <compilerArgs>
+              <arg>-Xplugin:jabel</arg>
+            </compilerArgs>
           </configuration>
         </plugin>
         <plugin>
@@ -383,6 +396,25 @@
       <properties>
         <skipTests>true</skipTests>
       </properties>
+    </profile>
+    <profile>
+      <id>intellij-idea-only</id>
+      <activation>
+        <property>
+          <name>idea.maven.embedder.version</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <release>11</release>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>
