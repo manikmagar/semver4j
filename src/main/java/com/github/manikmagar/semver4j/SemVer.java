@@ -111,7 +111,7 @@ public class SemVer {
 	 *            {@link Prerelease} Identifier
 	 * @return SemVer with current version
 	 */
-	public SemVer of(Prerelease prerelease) {
+	public SemVer with(Prerelease prerelease) {
 		this.prereleases.add(prerelease);
 		return this;
 	}
@@ -146,7 +146,7 @@ public class SemVer {
 	 *            {@link BuildMetadata} Identifier
 	 * @return SemVer with current version
 	 */
-	public SemVer of(BuildMetadata buildMetadata) {
+	public SemVer with(BuildMetadata buildMetadata) {
 		this.buildMetadata.add(buildMetadata);
 		return this;
 	}
