@@ -40,6 +40,16 @@ implementation 'com.github.manikmagar:semver4j:${semver4j.version}'
 == Usage
 Check link:src/test/java/com/github/manikmagar/semver4j/SemVerTest.java[SemVerTest.java] for all usage examples.
 
+.SemVer Example
+[source, java]
+----
+//Build Version 1.2.3-Alpha+Build-01
+  var version = new SemVer(1, 2, 3)
+    .with(prerelease("Alpha"))
+    .with(build("Build-01"))
+  System.out.println(version.toString())
+----
+
 == Build
 
 Run the following command to build this project:
