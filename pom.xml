@@ -115,7 +115,7 @@
         <plugin>
           <groupId>com.github.manikmagar</groupId>
           <artifactId>git-versioner-maven-plugin</artifactId>
-          <version>0.2.0</version>
+          <version>0.3.0</version>
           <executions>
             <execution>
               <id>set-version</id>
