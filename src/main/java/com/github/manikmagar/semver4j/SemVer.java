@@ -270,7 +270,8 @@ public class SemVer {
 		 * Get {@link Prerelease} for given label
 		 * 
 		 * @param label
-		 * @return
+		 *            {@link String} for prerelease identifier
+		 * @return Prerelease
 		 */
 		public static Prerelease of(String label) {
 			return new Prerelease(validated(label));
