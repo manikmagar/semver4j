@@ -116,14 +116,6 @@
           <groupId>com.github.manikmagar</groupId>
           <artifactId>git-versioner-maven-plugin</artifactId>
           <version>0.3.0</version>
-          <executions>
-            <execution>
-              <id>set-version</id>
-              <goals>
-                <goal>set</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
           <groupId>com.mycila</groupId>
@@ -251,7 +243,20 @@
         </plugin>
       </plugins>
     </pluginManagement>
-
+    <plugins>
+      <plugin>
+        <groupId>com.github.manikmagar</groupId>
+        <artifactId>git-versioner-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>set-version</id>
+            <goals>
+              <goal>set</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
   <profiles>
     <profile>
