@@ -16,12 +16,16 @@
 package com.github.manikmagar.semver4j;
 
 import java.util.Arrays;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static com.github.manikmagar.semver4j.SemVer.build;
 import static com.github.manikmagar.semver4j.SemVer.prerelease;
@@ -66,47 +70,6 @@ class SemVerTest {
 	@Test
 	void withVersions() {
 		assertThat(SemVer.of(1, 2, 3)).as("Semver 1.2.3").asString().isEqualTo("1.2.3");
-	}
-
-	@Test
-	@DisplayName("Increment Major version")
-	void incrementMajor() {
-		assertThat(new SemVer(1, 2, 3).incrementMajor()).as("Semver 1.2.3 incremented major").asString()
-				.isEqualTo("2.0.0");
-	}
-
-	@Test
-	@DisplayName("Increment Major version with Prerelease")
-	void incrementMajorWithPrerelease() {
-		assertThat(new SemVer(1, 2, 3).with(prerelease("alpha")).incrementMajor())
-				.as("Semver 1.2.3-aplha incremented major").asString().isEqualTo("2.0.0");
-	}
-
-	@Test
-	@DisplayName("Increment Minor version")
-	void incrementMinor() {
-		assertThat(new SemVer(1, 2, 3).incrementMinor()).as("Semver 1.2.3 incremented minor").asString()
-				.isEqualTo("1.3.0");
-	}
-	@Test
-	@DisplayName("Increment Minor version with Prerelease")
-	void incrementMinorWithPrerelease() {
-		assertThat(new SemVer(1, 2, 3).with(prerelease("alpha")).incrementMinor())
-				.as("Semver 1.2.3-alpha incremented minor").asString().isEqualTo("1.3.0");
-	}
-
-	@Test
-	@DisplayName("Increment Patch version")
-	void incrementPatch() {
-		assertThat(new SemVer(1, 2, 3).incrementPatch()).as("Semver 1.2.3 incremented patch").asString()
-				.isEqualTo("1.2.4");
-	}
-
-	@Test
-	@DisplayName("Increment Patch version with Prerelease")
-	void incrementPatchWithPrerelease() {
-		assertThat(new SemVer(1, 2, 3).with(prerelease("alpha")).incrementPatch())
-				.as("Semver 1.2.3-alphas incremented patch").asString().isEqualTo("1.2.4");
 	}
 
 	@Test
@@ -215,5 +178,50 @@ class SemVerTest {
 	@DisplayName("SemVer Zero")
 	void zero() {
 		assertThat(SemVer.zero()).asString().isEqualTo("0.0.0");
+	}
+
+	@ParameterizedTest
+	@DisplayName("Parameterized version increment")
+	@MethodSource("versionProvider")
+	void verifyVersionIncrement(Wrapped process, SemVer semVer, String toStringValue) {
+		assertThat(process.getProcessor().apply(semVer)).asString().isEqualTo(toStringValue);
+	}
+
+	public static Stream<Arguments> versionProvider() {
+		return Stream.of(
+				Arguments.of(new Wrapped(SemVer::incrementMajor, "incrementMajor"), new SemVer(1, 2, 3), "2.0.0"),
+				Arguments.of(new Wrapped(SemVer::incrementMinor, "incrementMinor"), new SemVer(1, 2, 3), "1.3.0"),
+				Arguments.of(new Wrapped(SemVer::incrementPatch, "incrementPatch"), new SemVer(1, 2, 3), "1.2.4"),
+				Arguments.of(new Wrapped(SemVer::incrementMajor, "incrementMajor with build"),
+						new SemVer(1, 2, 3).with(build("hash1")), "2.0.0"),
+				Arguments.of(new Wrapped(SemVer::incrementMinor, "incrementMinor with build"),
+						new SemVer(1, 2, 3).with(build("hash1")), "1.3.0"),
+				Arguments.of(new Wrapped(SemVer::incrementPatch, "incrementPatch with build"),
+						new SemVer(1, 2, 3).with(build("hash1")), "1.2.4"),
+				Arguments.of(new Wrapped(SemVer::incrementMajor, "incrementMajor with prerelease"),
+						new SemVer(1, 2, 3).with(prerelease("alpha1")), "2.0.0"),
+				Arguments.of(new Wrapped(SemVer::incrementMinor, "incrementMinor with prerelease"),
+						new SemVer(1, 2, 3).with(prerelease("alpha1")), "1.3.0"),
+				Arguments.of(new Wrapped(SemVer::incrementPatch, "incrementPatch with prerelease"),
+						new SemVer(1, 2, 3).with(prerelease("alpha1")), "1.2.4"));
+	}
+
+	public static class Wrapped {
+		private final Function<SemVer, SemVer> processor;
+		private final String methodName;
+
+		public Wrapped(Function<SemVer, SemVer> processor, String methodName) {
+			this.processor = processor;
+			this.methodName = methodName;
+		}
+
+		public Function<SemVer, SemVer> getProcessor() {
+			return processor;
+		}
+
+		@Override
+		public String toString() {
+			return methodName;
+		}
 	}
 }

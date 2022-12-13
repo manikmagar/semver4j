@@ -204,6 +204,8 @@ public class SemVer {
 	private void resetMetadata() {
 		if (!prereleases.isEmpty())
 			this.prereleases = Collections.synchronizedList(new ArrayList<>());
+		if (!buildMetadata.isEmpty())
+			this.buildMetadata = Collections.synchronizedList(new ArrayList<>());
 	}
 	/**
 	 * Major version zero is for initial development. See <a href=
