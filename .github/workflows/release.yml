@@ -36,7 +36,7 @@ jobs:
           distribution: ${{ env.JAVA_DISTRO }}
           cache: maven
       - name: Set Version
-        run: ./mvnw validate
+        run: ./mvnw git-versioner:set
       - name: Stage Deploy
         run: ./mvnw deploy -Pdeploy -DskipTests
       - name: Run JReleaser Deploy
