@@ -125,6 +125,21 @@ public class SemVer {
 	}
 
 	/**
+	 * Resets any existing prerelease identifiers in this version and adds a
+	 * provided prerelease as a new. See <a href=
+	 * "https://semver.org/spec/v2.0.0.html#spec-item-9">v2.0.0.html#spec-item-9</a>
+	 *
+	 * @param prerelease
+	 *            {@link Prerelease} Identifier
+	 * @return SemVer with current version
+	 */
+	public SemVer withNew(Prerelease prerelease) {
+		resetPrereleasesIfNeeded();
+		this.prereleases.add(prerelease);
+		return this;
+	}
+
+	/**
 	 * Create {@link Prerelease} for given identifier
 	 * 
 	 * @param identifier
@@ -155,6 +170,21 @@ public class SemVer {
 	 * @return SemVer with current version
 	 */
 	public SemVer with(BuildMetadata buildMetadata) {
+		this.buildMetadata.add(buildMetadata);
+		return this;
+	}
+
+	/**
+	 * Resets any existing Build metadata identifiers in this version and adds a
+	 * provided build metadata as a new . See <a href=
+	 * "https://semver.org/spec/v2.0.0.html#spec-item-9">v2.0.0.html#spec-item-9</a>
+	 *
+	 * @param buildMetadata
+	 *            {@link BuildMetadata} Identifier
+	 * @return SemVer with current version
+	 */
+	public SemVer withNew(BuildMetadata buildMetadata) {
+		resetBuildMetadataIfNeeded();
 		this.buildMetadata.add(buildMetadata);
 		return this;
 	}
@@ -202,8 +232,16 @@ public class SemVer {
 	 * Reset release identifiers and build metadata
 	 */
 	private void resetMetadata() {
+		resetPrereleasesIfNeeded();
+		resetBuildMetadataIfNeeded();
+	}
+
+	private void resetPrereleasesIfNeeded() {
 		if (!prereleases.isEmpty())
 			this.prereleases = Collections.synchronizedList(new ArrayList<>());
+	}
+
+	private void resetBuildMetadataIfNeeded() {
 		if (!buildMetadata.isEmpty())
 			this.buildMetadata = Collections.synchronizedList(new ArrayList<>());
 	}

@@ -86,6 +86,12 @@ class SemVerTest {
 		assertThat(new SemVer(1, 2, 3).with(prerelease("Al-pha01")))
 				.as("Prerelease Version with all allowed characters").asString().isEqualTo("1.2.3-Al-pha01");
 	}
+	@Test
+	@DisplayName("New Prerelease identifier removing existing")
+	void withNewPrereleaseIdentifierOverridingPrevious() {
+		assertThat(new SemVer(1, 2, 3).with(prerelease("Alpha-01")).withNew(prerelease("Alpha-New-01")))
+				.as("New prerelease version overriding previous").asString().isEqualTo("1.2.3-Alpha-New-01");
+	}
 
 	@Test
 	@DisplayName("Numeric prerelease identifier without leading zeros")
@@ -148,6 +154,12 @@ class SemVerTest {
 	void withSingleBuildIdentifier() {
 		assertThat(new SemVer(1, 2, 3).with(build("Some-01"))).as("Build Version with all allowed characters")
 				.asString().isEqualTo("1.2.3+Some-01");
+	}
+	@Test
+	@DisplayName("New Build identifier removing existing")
+	void withNewBuildIdentifierOverridingPrevious() {
+		assertThat(new SemVer(1, 2, 3).with(build("Some-01")).withNew(build("Some-New-01")))
+				.as("New build version overriding previous").asString().isEqualTo("1.2.3+Some-New-01");
 	}
 
 	@Test
